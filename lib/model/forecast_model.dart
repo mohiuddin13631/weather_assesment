@@ -1,6 +1,6 @@
 class WeeklyForecast{
   String date;
-  String avgtemp_c;
+  double avgtemp_c;
   String text;
   String icon;
 

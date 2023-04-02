@@ -50,6 +50,8 @@ class _HomePageState extends State<HomePage> {
   Position? position;
   CurrentWeatherModel? currentWeatherModel;
 
+//todo--------------------------------------------------
+
   Future<CurrentWeatherModel> loadData()async{
     String url = "https://api.openweathermap.org/data/2.5/weather?lat=${position!.latitude}&lon=${position!.longitude}&appid=bf881cd668c8bd1799a36d79a42c897b&units=metric";
 
@@ -62,21 +64,30 @@ class _HomePageState extends State<HomePage> {
     return currentWeatherModel!;
   }
 
-  WeeklyForecast? weeklyForecast;
+
+  //todo: ---------------------------------------------------
+
   List<WeeklyForecast> weeklyData = [];
-  WeekModel? weekModel;
+  // WeekModel? weekModel;
   loadForecastData() async {
     String url = "http://api.weatherapi.com/v1/forecast.json?key= 4a536faf63724b8a86a50958232603 &q=Dhaka&days=7&aqi=no&alerts=no";
     var response = await http.get(Uri.parse(url));
     var data = jsonDecode(response.body);
-    setState(() {
-      weekModel = WeekModel.fromJson(data);
-    });
-    // for(var i in data){
-    //   WeeklyForecast weeklyForecast = WeeklyForecast(
-    //     date: i['forecast']['forecastday']
-    //   );
-    // }
+    // setState(() {
+    //   weekModel = WeekModel.fromJson(data);
+    // });
+    for(var i in data['forecast']['forecastday']){
+      WeeklyForecast weeklyForecast = WeeklyForecast(
+        date: i['date'],
+        avgtemp_c: i['day']['avgtemp_c'],
+        text: i['day']['condition']['text'],
+        icon: i['day']['condition']['icon']
+      );
+      setState(() {
+        weeklyData.add(weeklyForecast);
+      });
+      // print(weeklyData);
+    }
   }
 
   @override
@@ -88,7 +99,7 @@ class _HomePageState extends State<HomePage> {
   }
   @override
   Widget build(BuildContext context) {
-    return currentWeatherModel != null && weekModel != null? Scaffold(
+    return currentWeatherModel != null? Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -123,7 +134,7 @@ class _HomePageState extends State<HomePage> {
             child: ListView.builder(
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
-              itemCount: weekModel!.forecast!.forecastday!.length,
+              itemCount: weeklyData.length,
               itemBuilder: (context, index) {
                 return Container(
                   margin: EdgeInsets.only(right: 10),
@@ -137,10 +148,10 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Text("${Jiffy(weekModel!.forecast!.forecastday![index].date).format('EEE, h:mm') }"),
-                      Image.network(weekModel!.forecast!.forecastday![index].day!.condition!.icon.toString()),
+                      Text("${Jiffy(weeklyData[index].date).format('EEE, h:mm') }"),
+                      Image.network(weeklyData[index].icon),
                       Align(
-                          child: Text(weekModel!.forecast!.forecastday![index].day!.condition!.text.toString(),textAlign: TextAlign.center,))
+                          child: Text(weeklyData[index].text,textAlign: TextAlign.center,)),
                     ],
                   ),
                 );
